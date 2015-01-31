@@ -1,0 +1,48 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+sourceCompatibility = 1.5
+version = '1.0'
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Quickstart', 'Implementation-Version': version
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url "http://sagebionetworks.artifactoryonline.com/sagebionetworks/libs-releases-local"
+    }
+}
+
+dependencies {
+    compile 'org.sagebionetworks:synapseJavaClient:2015+'
+    compile 'org.springframework:spring-context:3.2.10.RELEASE'
+    compile 'org.slf4j:slf4j-api:1.7.7'
+    compile 'org.sagebionetworks:dashboard-core:0.1.3+'
+    compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+
+/*** Command-line Application ***/
+
+apply plugin: 'application'
+mainClassName = "org.sagebionetworks.aclscript.App"
+run {
+    args = [stack, username, password, filePath]
+}
+
+/***   ***/
+
+test {
+    systemProperties 'property': 'value'
+}
+
+uploadArchives {
+    repositories {
+       flatDir {
+           dirs 'repos'
+       }
+    }
+}
