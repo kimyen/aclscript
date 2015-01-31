@@ -26,9 +26,6 @@ public class App {
         }
         adminSynapse.setUserName(username);
         adminSynapse.setApiKey(password);
-        System.out.println(adminSynapse.getAuthEndpoint());
-        System.out.println(adminSynapse.getRepoEndpoint());
-        System.out.println(adminSynapse.getFileEndpoint());
 
         process(adminSynapse, filePath);
     }
@@ -58,6 +55,5 @@ public class App {
             adminSynapse.setRepositoryEndpoint(LOCAL_REPO);
             adminSynapse.setFileEndpoint(LOCAL_FILE);
         }
-
     }
 }
