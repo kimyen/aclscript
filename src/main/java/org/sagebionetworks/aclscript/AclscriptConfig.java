@@ -50,6 +50,16 @@ public class AclscriptConfig implements Config {
         return config.getStack();
     }
 
+    public String getAuthEndpoint(String stack) {
+        return config.get(stack + ".auth.endpoint");
+    }
+    public String getRepoEndpoint(String stack) {
+        return config.get(stack + ".repo.endpoint");
+    }
+    public String getFileEndpoint(String stack) {
+        return config.get(stack + ".file.endpoint");
+    }
+
     private final Logger logger = LoggerFactory.getLogger(AclscriptConfig.class);
     private final Config config;
 }

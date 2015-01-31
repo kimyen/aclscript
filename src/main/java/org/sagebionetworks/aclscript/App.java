@@ -2,16 +2,18 @@ package org.sagebionetworks.aclscript;
 
 import org.sagebionetworks.client.SynapseAdminClient;
 import org.sagebionetworks.client.SynapseAdminClientImpl;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class App {
 
     private static SynapseAdminClient adminSynapse;
-    private final static String LOCAL_AUTH = "http://localhost:8080/services-repository-develop-SNAPSHOT/auth/v1";
+/*    private final static String LOCAL_AUTH = "http://localhost:8080/services-repository-develop-SNAPSHOT/auth/v1";
     private final static String LOCAL_REPO = "http://localhost:8080/services-repository-develop-SNAPSHOT/repo/v1";
     private final static String LOCAL_FILE = "http://localhost:8080/services-repository-develop-SNAPSHOT/file/v1";
     private final static String STAGING_AUTH = "https://auth-staging.prod.sagebase.org/auth/v1";
     private final static String STAGING_REPO = "https://repo-staging.prod.sagebase.org/repo/v1";
-    private final static String STAGING_FILE = "https://file-staging.prod.sagebase.org/file/v1";
+    private final static String STAGING_FILE = "https://file-staging.prod.sagebase.org/file/v1";*/
 
     public static void main(String[] args) {
         if (args.length != 4) printUsage();
@@ -48,8 +50,15 @@ public class App {
      */
     private static void setEndPoint(SynapseAdminClient adminSynapse, String stack) {
         if (stack == null || (!stack.equals("staging") && (!stack.equals("local")))) printUsage();
+        final ConfigurableApplicationContext context = new ClassPathXmlApplicationContext("/setting.xml");
+        context.registerShutdownHook();
+        AclscriptConfig config = context.getBean(AclscriptConfig.class);
 
-        if (stack.equals("staging")) {
+        adminSynapse.setAuthEndpoint(config.getAuthEndpoint(stack));
+        adminSynapse.setRepositoryEndpoint(config.getRepoEndpoint(stack));
+        adminSynapse.setFileEndpoint(config.getFileEndpoint(stack));
+
+/*        if (stack.equals("staging")) {
             adminSynapse.setAuthEndpoint(STAGING_AUTH);
             adminSynapse.setRepositoryEndpoint(STAGING_REPO);
             adminSynapse.setFileEndpoint(STAGING_FILE);
@@ -57,7 +66,7 @@ public class App {
             adminSynapse.setAuthEndpoint(LOCAL_AUTH);
             adminSynapse.setRepositoryEndpoint(LOCAL_REPO);
             adminSynapse.setFileEndpoint(LOCAL_FILE);
-        }
-
+        }*/
+        //context.close();
     }
 }
