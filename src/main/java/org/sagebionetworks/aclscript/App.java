@@ -1,7 +1,13 @@
 package org.sagebionetworks.aclscript;
 
+import java.io.IOException;
+
+import com.csvreader.CsvReader;
+
 import org.sagebionetworks.client.SynapseAdminClient;
 import org.sagebionetworks.client.SynapseAdminClientImpl;
+import org.sagebionetworks.client.exceptions.SynapseException;
+import org.sagebionetworks.repo.model.AccessControlList;
 
 public class App {
 
@@ -27,11 +33,26 @@ public class App {
         adminSynapse.setUserName(username);
         adminSynapse.setApiKey(password);
 
-        process(adminSynapse, filePath);
+        try {
+            process(adminSynapse, filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    private static void process(SynapseAdminClient adminSynapse, String filePath) {
-        
+    private static void process(SynapseAdminClient adminSynapse, String filePath) throws IOException {
+        CsvReader reader = new CsvReader(filePath);
+        while (reader.readRecord()) {
+            String id = reader.get(0);
+            AccessControlList acl;
+            try {
+                acl = adminSynapse.getACL(id.toString());
+                adminSynapse.updateACL(acl);
+            } catch (SynapseException e) {
+                e.printStackTrace();
+            }
+        }
+        reader.close();
     }
 
     private static void printUsage() {
@@ -40,9 +61,6 @@ public class App {
         System.exit(0);
     }
 
-    /*
-     * Set the endpoints based on the ~/.aclscript/aclscript.config file
-     */
     private static void setEndPoint(SynapseAdminClient adminSynapse, String stack) {
         if (stack == null || (!stack.equals("staging") && (!stack.equals("local")))) printUsage();
 
