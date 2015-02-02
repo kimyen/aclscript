@@ -46,7 +46,9 @@ public class App {
             String id = reader.get(0);
             AccessControlList acl;
             try {
+                System.out.println("Getting ACL with id = " + id);
                 acl = adminSynapse.getACL(id.toString());
+                System.out.println("Updating ACL: " + acl.toString());
                 adminSynapse.updateACL(acl);
             } catch (SynapseException e) {
                 e.printStackTrace();
