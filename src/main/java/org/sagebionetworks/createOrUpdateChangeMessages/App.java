@@ -1,12 +1,16 @@
 package org.sagebionetworks.createOrUpdateChangeMessages;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.sagebionetworks.client.SynapseAdminClient;
 import org.sagebionetworks.client.SynapseAdminClientImpl;
 import org.sagebionetworks.client.exceptions.SynapseException;
-import org.sagebionetworks.repo.model.AccessControlList;
-import org.sagebionetworks.repo.model.TeamMember;
+import org.sagebionetworks.repo.model.ObjectType;
+import org.sagebionetworks.repo.model.message.ChangeMessage;
+import org.sagebionetworks.repo.model.message.ChangeMessages;
+import org.sagebionetworks.repo.model.message.ChangeType;
 
 import com.csvreader.CsvReader;
 
@@ -19,6 +23,7 @@ public class App {
     private final static String STAGING_AUTH = "https://auth-staging.prod.sagebase.org/auth/v1";
     private final static String STAGING_REPO = "https://repo-staging.prod.sagebase.org/repo/v1";
     private final static String STAGING_FILE = "https://file-staging.prod.sagebase.org/file/v1";
+    private static final int BATCH_SIZE = 1000;
 
     public static void main(String[] args) {
         if (args.length != 5) printUsage();
@@ -26,7 +31,6 @@ public class App {
         String username = args[1];
         String apiKey = args[2];
         String filePath = args[3];
-        String type = args[4];
 
         adminSynapse = new SynapseAdminClientImpl();
         if (stack != null && !stack.equals("prod")) {
@@ -35,82 +39,41 @@ public class App {
         adminSynapse.setUserName(username);
         adminSynapse.setApiKey(apiKey);
 
-        process(adminSynapse, filePath, type);
-    }
-
-    private static void process(SynapseAdminClient adminSynapse, String filePath, String type) {
-        if (type.equals("entity")) {
-            try {
-                processEntity(adminSynapse, filePath);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else if (type.equals("team")) {
-            try {
-                processTeam(adminSynapse, filePath);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else if (type.equals("eval")) {
-            try {
-                processEval(adminSynapse, filePath);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            printUsage();
+        try {
+            process(adminSynapse, filePath);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    private static void processEval(SynapseAdminClient adminSynapse, String filePath) throws IOException {
+    private static void process(SynapseAdminClient adminSynapse, String filePath) throws IOException, SynapseException {
         CsvReader reader = new CsvReader(filePath);
+        List<ChangeMessage> list = new ArrayList<ChangeMessage>();
         while (reader.readRecord()) {
-            String id = reader.get(0);
-            AccessControlList acl;
-            try {
-                System.out.println("Getting ACL with Evaluation Id = " + id);
-                acl = adminSynapse.getEvaluationAcl(id);
-                System.out.println("Updating ACL: " + acl.toString());
-                adminSynapse.updateEvaluationAcl(acl);
-            } catch (SynapseException e) {
-                e.printStackTrace();
+            ChangeMessage changeMessage = new ChangeMessage();
+            changeMessage.setObjectId(reader.get(0));
+            changeMessage.setObjectType(ObjectType.valueOf(reader.get(1)));
+            changeMessage.setObjectEtag(reader.get(2));
+            changeMessage.setChangeType(ChangeType.valueOf(reader.get(3)));
+            list.add(changeMessage);
+
+            if (list.size() == BATCH_SIZE) {
+                createOrUpdateChangeMessages(adminSynapse, list);
+                list = new ArrayList<ChangeMessage>();
             }
+        }
+        if (!list.isEmpty()) {
+            createOrUpdateChangeMessages(adminSynapse, list);
         }
         reader.close();
     }
 
-    private static void processTeam(SynapseAdminClient adminSynapse, String filePath) throws IOException {
-        CsvReader reader = new CsvReader(filePath);
-        while (reader.readRecord()) {
-            String teamId = reader.get(0);
-            String memberId = reader.get(1);
-            try {
-                System.out.println("Getting ACL with Team Id = " + teamId + " member Id = " + memberId);
-                TeamMember member = adminSynapse.getTeamMember(teamId, memberId);
-                System.out.println("Updating status: " + member.getIsAdmin());
-                adminSynapse.setTeamMemberPermissions(teamId, memberId, member.getIsAdmin());
-            } catch (SynapseException e) {
-                e.printStackTrace();
-            }
-        }
-        reader.close();
-    }
-
-    private static void processEntity(SynapseAdminClient adminSynapse, String filePath) throws IOException {
-        CsvReader reader = new CsvReader(filePath);
-        while (reader.readRecord()) {
-            String id = reader.get(0);
-            AccessControlList acl;
-            try {
-                System.out.println("Getting ACL with entityId = " + id);
-                acl = adminSynapse.getACL(id.toString());
-                System.out.println("Updating ACL: " + acl.toString());
-                adminSynapse.updateACL(acl);
-            } catch (SynapseException e) {
-                e.printStackTrace();
-            }
-        }
-        reader.close();
+    private static void createOrUpdateChangeMessages(
+            SynapseAdminClient adminSynapse, List<ChangeMessage> list)
+            throws SynapseException {
+        ChangeMessages batch = new ChangeMessages();
+        batch.setList(list);
+        adminSynapse.createOrUpdateChangeMessages(batch);
     }
 
     private static void printUsage() {
