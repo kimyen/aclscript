@@ -28,7 +28,7 @@ dependencies {
 /*** Command-line Application ***/
 
 apply plugin: 'application'
-mainClassName = "org.sagebionetworks.aclscript.App"
+mainClassName = "org.sagebionetworks.createOrUpdateChangeMessages.App"
 run {
     args = [stack, username, apiKey, filePath]
 }

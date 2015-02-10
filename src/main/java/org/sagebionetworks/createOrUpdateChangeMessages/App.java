@@ -26,7 +26,7 @@ public class App {
     private static final int BATCH_SIZE = 1000;
 
     public static void main(String[] args) {
-        if (args.length != 5) printUsage();
+        if (args.length != 4) printUsage();
         String stack = args[0];
         String username = args[1];
         String apiKey = args[2];
