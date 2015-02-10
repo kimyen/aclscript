@@ -29,7 +29,7 @@ dependencies {
 apply plugin: 'application'
 mainClassName = "org.sagebionetworks.aclscript.App"
 run {
-    args = [stack, username, apiKey, filePath, type]
+    args = [stack, username, apiKey, filePath]
 }
 
 /***   ***/
