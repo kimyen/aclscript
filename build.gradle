@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    compile 'org.sagebionetworks:synapseJavaClient:2015+'
+    compile 'org.sagebionetworks:synapseJavaClient:2015-02-04-1587+'
     compile 'net.sourceforge.javacsv:javacsv:2.0'
     compile 'org.slf4j:slf4j-api:1.7.7'
     compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
@@ -29,7 +29,7 @@ dependencies {
 apply plugin: 'application'
 mainClassName = "org.sagebionetworks.aclscript.App"
 run {
-    args = [stack, username, password, filePath]
+    args = [stack, username, apiKey, filePath, type]
 }
 
 /***   ***/

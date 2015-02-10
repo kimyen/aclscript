@@ -3,4 +3,4 @@
 gradle clean install
 
 # To run
-gradle run -Pstack=local/staging/prod -Pusername=synapseAdminUsername -Ppassword=password -PfilePath=filePath
+gradle run -Pstack=local/staging/prod -Pusername=synapseAdminUsername -PapiKey=apiKey -PfilePath=filePath -Ptype=entity/team/eval
