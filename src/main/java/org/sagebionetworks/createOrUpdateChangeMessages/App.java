@@ -86,16 +86,16 @@ public class App {
     }
 
     private static void setEndPoint(SynapseAdminClient adminSynapse, String stack) {
-        if (!stack.equals("staging") && (!stack.equals("local"))) printUsage();
-
         if (stack.equals("staging")) {
             adminSynapse.setAuthEndpoint(STAGING_AUTH);
             adminSynapse.setRepositoryEndpoint(STAGING_REPO);
             adminSynapse.setFileEndpoint(STAGING_FILE);
-        } else {
+        } else if (stack.equals("local")){
             adminSynapse.setAuthEndpoint(LOCAL_AUTH);
             adminSynapse.setRepositoryEndpoint(LOCAL_REPO);
             adminSynapse.setFileEndpoint(LOCAL_FILE);
+        } else {
+            printUsage();
         }
     }
 }
