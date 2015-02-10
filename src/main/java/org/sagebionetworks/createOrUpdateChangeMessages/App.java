@@ -23,7 +23,7 @@ public class App {
     private final static String STAGING_AUTH = "https://auth-staging.prod.sagebase.org/auth/v1";
     private final static String STAGING_REPO = "https://repo-staging.prod.sagebase.org/repo/v1";
     private final static String STAGING_FILE = "https://file-staging.prod.sagebase.org/file/v1";
-    private static final int BATCH_SIZE = 1000;
+    private static final int BATCH_SIZE = 100;
 
     public static void main(String[] args) {
         if (args.length != 4) printUsage();
