@@ -33,7 +33,10 @@ public class App {
         String filePath = args[3];
 
         adminSynapse = new SynapseAdminClientImpl();
-        if (stack != null && !stack.equals("prod")) {
+        if (stack == null) {
+            printUsage();
+        }
+        if (!stack.equals("prod")) {
             setEndPoint(adminSynapse, stack);
         }
         adminSynapse.setUserName(username);
@@ -83,7 +86,7 @@ public class App {
     }
 
     private static void setEndPoint(SynapseAdminClient adminSynapse, String stack) {
-        if (stack == null || (!stack.equals("staging") && (!stack.equals("local")))) printUsage();
+        if (!stack.equals("staging") && (!stack.equals("local"))) printUsage();
 
         if (stack.equals("staging")) {
             adminSynapse.setAuthEndpoint(STAGING_AUTH);
